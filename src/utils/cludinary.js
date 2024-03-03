@@ -8,7 +8,7 @@ cloudinary.config({
   api_secret: process.env.COULDINARY_API_SECRET 
 });
 
-const uploadCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath) => {
     try {
         if(!localFilePath) return null
 
@@ -22,9 +22,13 @@ const uploadCloudinary = async (localFilePath) => {
 
     } catch (error) {
         fs.unlinkSync(localFilePath) //remove the locally saved temporary file as the upload
+        return null
     }
 }
 
-cloudinary.uploader.upload("https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
-  { public_id: "olympic_flag" }, 
-  function(error, result) {console.log(result); });
+// cloudinary.uploader.upload("https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
+//   { public_id: "olympic_flag" }, 
+//   function(error, result) {console.log(result); });
+
+
+  export {uploadOnCloudinary}
