@@ -9,7 +9,7 @@ dotenv.config({
 connectDB()
 .then(() => {
     app.listen(process.env.PORT || 8000, () => {
-        console.log(`MongoDB connection sucessful at PORT`)
+        console.log(`MongoDB connection sucessful at PORT ${process.env.PORT}`)
     })
 })
 .catch((err) => {

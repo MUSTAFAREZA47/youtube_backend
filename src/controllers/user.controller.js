@@ -16,8 +16,8 @@ const registerUser = asyncHandler(async (req, res) => {
     // check for user creation
     // return res
 
-    const { fullname, username, email, password } = res.body
-    console.log("email", email)
+    const { fullname, username, email, password } = req.body
+    // console.log("email", email)
 
 
     // validation checking method - 1
@@ -29,14 +29,15 @@ const registerUser = asyncHandler(async (req, res) => {
     // validtion checking method - 2
     if (
         [fullname, username, email, password].some((field) => {
-            field?.trim() === ""
+            return field?.trim() === ""
         })
     ) {
         throw new ApiError(400, "fullname is required")
     }
 
-    const existedUser = User.findOne({
-        $or: [ {username}, {email}]
+    const existedUser = await User.findOne({
+        $or: [ {username}, {email}],
+        _id: { $exists: true } // check if the user exists (optional)
     })
 
     if (existedUser) {
@@ -44,15 +45,22 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0];
-
+    
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required")
     }
+    
+    // const coverImageLocalPath = req.files?.coverImage[0].path;
+    let coverImageLocalPath;
+
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
+
 
     // upload on cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const converImage = await uploadOnCloudinary(coverImageLocalPath)
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!avatar) {
         throw new ApiError(400, "Avatar file is required")
@@ -61,7 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create({
         fullname,
         avatar: avatar.url,
-        coverImage: converImage?.url || "",
+        coverImage: coverImage?.url || "",
         email,
         password,
         username: username.toLowerCase()
